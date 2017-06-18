@@ -55,7 +55,7 @@ def find_industry(htmlTree):
 def process_symbol(writer, symbol):
     try:
         logger.info("Getting info for %s" % (symbol))
-        url = "http://finance.yahoo.com/q/in?s=%s+Industry" % (symbol)
+        url = "http://finance.google.com/q/in?s=%s+Industry" % (symbol)
         htmlTree = lxml.html.parse(url)
 
         company = find_company(htmlTree, symbol)

@@ -25,7 +25,7 @@ import common
 
 from pyalgotrade.optimizer import local
 from pyalgotrade import strategy
-from pyalgotrade.barfeed import yahoofeed
+from pyalgotrade.barfeed import googlefeed
 
 sys.path.append("samples")
 import sma_crossover
@@ -46,9 +46,9 @@ class FailingStrategy(strategy.BacktestingStrategy):
 
 class OptimizerTestCase(common.TestCase):
     def testLocal(self):
-        barFeed = yahoofeed.Feed()
+        barFeed = googlefeed.Feed()
         instrument = "orcl"
-        barFeed.addBarsFromCSV(instrument, common.get_data_file_path("orcl-2000-yahoofinance.csv"))
+        barFeed.addBarsFromCSV(instrument, common.get_data_file_path("orcl-2000-googlefinance.csv"))
         res = local.run(
             sma_crossover.SMACrossOver, barFeed, parameters_generator(instrument, 5, 100), logLevel=logging.DEBUG
         )
@@ -56,8 +56,8 @@ class OptimizerTestCase(common.TestCase):
         self.assertEquals(res.getParameters()[1], 20)
 
     def testFailingStrategy(self):
-        barFeed = yahoofeed.Feed()
+        barFeed = googlefeed.Feed()
         instrument = "orcl"
-        barFeed.addBarsFromCSV(instrument, common.get_data_file_path("orcl-2000-yahoofinance.csv"))
+        barFeed.addBarsFromCSV(instrument, common.get_data_file_path("orcl-2000-googlefinance.csv"))
         res = local.run(FailingStrategy, barFeed, parameters_generator(instrument, 5, 100), logLevel=logging.DEBUG)
         self.assertIsNone(res)

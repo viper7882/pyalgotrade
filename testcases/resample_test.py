@@ -24,7 +24,7 @@ import os
 import common
 
 from pyalgotrade.barfeed import ninjatraderfeed
-from pyalgotrade.barfeed import yahoofeed
+from pyalgotrade.barfeed import googlefeed
 from pyalgotrade.barfeed import csvfeed
 from pyalgotrade.tools import resample
 from pyalgotrade import marketsession
@@ -269,9 +269,9 @@ class DataSeriesTestCase(common.TestCase):
 class BarFeedTestCase(common.TestCase):
 
     def testResampledBarFeed(self):
-        barFeed = yahoofeed.Feed()
-        barFeed.addBarsFromCSV("spy", common.get_data_file_path("spy-2010-yahoofinance.csv"))
-        barFeed.addBarsFromCSV("nikkei", common.get_data_file_path("nikkei-2010-yahoofinance.csv"))
+        barFeed = googlefeed.Feed()
+        barFeed.addBarsFromCSV("spy", common.get_data_file_path("spy-2010-googlefinance.csv"))
+        barFeed.addBarsFromCSV("nikkei", common.get_data_file_path("nikkei-2010-googlefinance.csv"))
         resampledBarFeed = resampled_bf.ResampledBarFeed(barFeed, bar.Frequency.MONTH)
 
         disp = dispatcher.Dispatcher()

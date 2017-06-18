@@ -23,7 +23,7 @@ import datetime
 import common
 
 from pyalgotrade import eventprofiler
-from pyalgotrade.barfeed import yahoofeed
+from pyalgotrade.barfeed import googlefeed
 
 
 class Predicate(eventprofiler.Predicate):
@@ -39,8 +39,8 @@ class Predicate(eventprofiler.Predicate):
 
 class EventProfilerTestCase(common.TestCase):
     def testNoEvents(self):
-        feed = yahoofeed.Feed()
-        feed.addBarsFromCSV("orcl", common.get_data_file_path("orcl-2000-yahoofinance.csv"))
+        feed = googlefeed.Feed()
+        feed.addBarsFromCSV("orcl", common.get_data_file_path("orcl-2000-googlefinance.csv"))
 
         predicate = Predicate([])
         eventProfiler = eventprofiler.Profiler(predicate, 5, 5)
@@ -48,8 +48,8 @@ class EventProfilerTestCase(common.TestCase):
         self.assertEqual(eventProfiler.getResults().getEventCount(), 0)
 
     def testEventsOnBoundary(self):
-        feed = yahoofeed.Feed()
-        feed.addBarsFromCSV("orcl", common.get_data_file_path("orcl-2000-yahoofinance.csv"))
+        feed = googlefeed.Feed()
+        feed.addBarsFromCSV("orcl", common.get_data_file_path("orcl-2000-googlefinance.csv"))
 
         dates = []
         dates.append(datetime.date(2000, 1, 3))
@@ -69,8 +69,8 @@ class EventProfilerTestCase(common.TestCase):
         self.assertEqual(eventProfiler.getResults().getEventCount(), 0)
 
     def testOneEvent(self):
-        feed = yahoofeed.Feed()
-        feed.addBarsFromCSV("orcl", common.get_data_file_path("orcl-2000-yahoofinance.csv"))
+        feed = googlefeed.Feed()
+        feed.addBarsFromCSV("orcl", common.get_data_file_path("orcl-2000-googlefinance.csv"))
 
         predicate = Predicate([datetime.date(2000, 1, 11)])
         eventProfiler = eventprofiler.Profiler(predicate, 5, 5)

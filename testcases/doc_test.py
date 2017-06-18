@@ -100,7 +100,7 @@ import csvfeed_1
 
 class CompInvTestCase(common.TestCase):
     def testCompInv_1(self):
-        files = [os.path.join("samples", "data", src) for src in ["aeti-2011-yahoofinance.csv", "egan-2011-yahoofinance.csv", "simo-2011-yahoofinance.csv", "glng-2011-yahoofinance.csv"]]
+        files = [os.path.join("samples", "data", src) for src in ["aeti-2011-googlefinance.csv", "egan-2011-googlefinance.csv", "simo-2011-googlefinance.csv", "glng-2011-googlefinance.csv"]]
         with common.CopyFiles(files, "."):
             res = common.run_sample_script("compinv-1.py")
 
@@ -143,7 +143,7 @@ class SampleStratTestCase(common.TestCase):
         files = []
         for year in range(2006, 2013):
             for symbol in ["gld", "gdx"]:
-                fileName = "%s-%d-yahoofinance.csv" % (symbol, year)
+                fileName = "%s-%d-googlefinance.csv" % (symbol, year)
                 files.append(os.path.join("samples", "data", fileName))
 
         with common.CopyFiles(files, "."):
@@ -164,7 +164,7 @@ statarb_erniechan.main(False)
         files = []
         for year in range(2011, 2013):
             for symbol in ["aapl"]:
-                fileName = "%s-%d-yahoofinance.csv" % (symbol, year)
+                fileName = "%s-%d-googlefinance.csv" % (symbol, year)
                 files.append(os.path.join("samples", "data", fileName))
 
         with common.CopyFiles(files, "."):
@@ -185,7 +185,7 @@ vwap_momentum.main(False)
         files = []
         for year in range(2011, 2013):
             for symbol in ["aapl"]:
-                fileName = "%s-%d-yahoofinance.csv" % (symbol, year)
+                fileName = "%s-%d-googlefinance.csv" % (symbol, year)
                 files.append(os.path.join("samples", "data", fileName))
 
         with common.CopyFiles(files, "."):
@@ -206,7 +206,7 @@ sma_crossover_sample.main(False)
         files = []
         for year in range(2009, 2013):
             for symbol in ["DIA"]:
-                fileName = "%s-%d-yahoofinance.csv" % (symbol, year)
+                fileName = "%s-%d-googlefinance.csv" % (symbol, year)
                 files.append(os.path.join("samples", "data", fileName))
 
         with common.CopyFiles(files, "."):
@@ -227,7 +227,7 @@ rsi2_sample.main(False)
         files = []
         for year in range(2011, 2013):
             for symbol in ["yhoo"]:
-                fileName = "%s-%d-yahoofinance.csv" % (symbol, year)
+                fileName = "%s-%d-googlefinance.csv" % (symbol, year)
                 files.append(os.path.join("samples", "data", fileName))
 
         with common.CopyFiles(files, "."):
@@ -247,7 +247,7 @@ bbands.main(False)
         files = []
         for year in range(2008, 2010):
             for symbol in ["AA", "AES", "AIG"]:
-                fileName = "%s-%d-yahoofinance.csv" % (symbol, year)
+                fileName = "%s-%d-googlefinance.csv" % (symbol, year)
                 files.append(os.path.join("samples", "data", fileName))
 
         with common.CopyFiles(files, "."):
@@ -294,7 +294,7 @@ quandl_sample.main(False)
         instruments = ["VTI", "VEU", "IEF", "VNQ", "DBC", "SPY"]
         for year in range(2007, 2013+1):
             for symbol in instruments:
-                fileName = "%s-%d-yahoofinance.csv" % (symbol, year)
+                fileName = "%s-%d-googlefinance.csv" % (symbol, year)
                 files.append(os.path.join("samples", "data", fileName))
 
         with common.CopyFiles(files, "data"):

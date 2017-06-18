@@ -23,7 +23,7 @@ import datetime
 import common
 import strategy_test
 
-from pyalgotrade.barfeed import yahoofeed
+from pyalgotrade.barfeed import googlefeed
 from pyalgotrade.barfeed import membf
 from pyalgotrade.stratanalyzer import drawdown
 from pyalgotrade import broker
@@ -180,7 +180,7 @@ class DDHelperCase(common.TestCase):
 
 class AnalyzerTestCase(common.TestCase):
     def testNoTrades(self):
-        barFeed = yahoofeed.Feed()
+        barFeed = googlefeed.Feed()
         barFeed.addBarsFromCSV("ige", common.get_data_file_path("sharpe-ratio-test-ige.csv"))
         barFeed.addBarsFromCSV("spy", common.get_data_file_path("sharpe-ratio-test-spy.csv"))
         strat = strategy_test.TestStrategy(barFeed, 1000)
@@ -199,7 +199,7 @@ class AnalyzerTestCase(common.TestCase):
         initialCash = 42.09*quantity
         # This testcase is based on an example from Ernie Chan's book:
         # 'Quantitative Trading: How to Build Your Own Algorithmic Trading Business'
-        barFeed = yahoofeed.Feed()
+        barFeed = googlefeed.Feed()
         barFeed.addBarsFromCSV("ige", common.get_data_file_path("sharpe-ratio-test-ige.csv"))
         strat = strategy_test.TestStrategy(barFeed, initialCash)
         strat.setUseAdjustedValues(True)

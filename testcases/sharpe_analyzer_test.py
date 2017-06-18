@@ -23,7 +23,7 @@ import datetime
 import common
 import strategy_test
 
-from pyalgotrade.barfeed import yahoofeed
+from pyalgotrade.barfeed import googlefeed
 from pyalgotrade.barfeed import ninjatraderfeed
 from pyalgotrade.barfeed import csvfeed
 from pyalgotrade.stratanalyzer import sharpe
@@ -42,7 +42,7 @@ class SharpeRatioTestCase(common.TestCase):
         self.assertEqual(sharpe.days_traded(datetime.datetime(2001, 1, 1), datetime.datetime(2001, 1, 2, 6)), 2)
 
     def testNoTrades(self):
-        barFeed = yahoofeed.Feed()
+        barFeed = googlefeed.Feed()
         barFeed.addBarsFromCSV("ige", common.get_data_file_path("sharpe-ratio-test-ige.csv"))
         strat = strategy_test.TestStrategy(barFeed, 1000)
         stratAnalyzer = sharpe.SharpeRatio()
@@ -58,7 +58,7 @@ class SharpeRatioTestCase(common.TestCase):
         initialCash = 42.09 * quantity
         # This testcase is based on an example from Ernie Chan's book:
         # 'Quantitative Trading: How to Build Your Own Algorithmic Trading Business'
-        barFeed = yahoofeed.Feed()
+        barFeed = googlefeed.Feed()
         barFeed.addBarsFromCSV("ige", common.get_data_file_path("sharpe-ratio-test-ige.csv"))
         strat = strategy_test.TestStrategy(barFeed, initialCash)
         strat.setUseAdjustedValues(True)
@@ -92,7 +92,7 @@ class SharpeRatioTestCase(common.TestCase):
         initialCash = 42.09 + commision
         # This testcase is based on an example from Ernie Chan's book:
         # 'Quantitative Trading: How to Build Your Own Algorithmic Trading Business'
-        barFeed = yahoofeed.Feed()
+        barFeed = googlefeed.Feed()
         barFeed.addBarsFromCSV("ige", common.get_data_file_path("sharpe-ratio-test-ige.csv"))
         strat = strategy_test.TestStrategy(barFeed, initialCash)
         strat.getBroker().setCommission(backtesting.FixedPerTrade(commision))

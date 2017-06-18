@@ -21,7 +21,7 @@ Main Features
 
  * Event driven.
  * Supports Market, Limit, Stop and StopLimit orders.
- * Supports any type of time-series data in CSV format like Yahoo! Finance, Google Finance, Quandl and NinjaTrader.
+ * Supports any type of time-series data in CSV format like Google Finance, Quandl and NinjaTrader.
  * Bitcoin trading support through [Bitstamp](https://www.bitstamp.net/).
  * Technical indicators and filters like SMA, WMA, EMA, RSI, Bollinger Bands, Hurst exponent and others.
  * Performance metrics like Sharpe ratio and drawdown analysis.

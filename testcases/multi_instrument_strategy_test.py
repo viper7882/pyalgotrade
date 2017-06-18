@@ -21,7 +21,7 @@
 import common
 
 from pyalgotrade import bar
-from pyalgotrade.barfeed import yahoofeed
+from pyalgotrade.barfeed import googlefeed
 from pyalgotrade.barfeed import sqlitefeed
 from pyalgotrade import marketsession
 from pyalgotrade import strategy
@@ -79,10 +79,10 @@ class TestCase(common.TestCase):
         # Market times in UTC:
         # - TSE: 0hs ~ 6hs
         # - US: 14:30hs ~ 21hs
-        feed = yahoofeed.Feed()
+        feed = googlefeed.Feed()
         for year in [2010, 2011]:
-            feed.addBarsFromCSV("^n225", common.get_data_file_path("nikkei-%d-yahoofinance.csv" % year), marketsession.TSE.getTimezone())
-            feed.addBarsFromCSV("spy", common.get_data_file_path("spy-%d-yahoofinance.csv" % year), marketsession.USEquities.getTimezone())
+            feed.addBarsFromCSV("^n225", common.get_data_file_path("nikkei-%d-googlefinance.csv" % year), marketsession.TSE.getTimezone())
+            feed.addBarsFromCSV("spy", common.get_data_file_path("spy-%d-googlefinance.csv" % year), marketsession.USEquities.getTimezone())
 
         self.__testDifferentTimezonesImpl(feed)
 

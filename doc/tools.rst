@@ -1,10 +1,10 @@
 Tools
 =====
 
-Yahoo! Finance
+Google Finance
 --------------
 
-.. automodule:: pyalgotrade.tools.yahoofinance
+.. automodule:: pyalgotrade.tools.googlefinance
     :members:
     :show-inheritance:
 

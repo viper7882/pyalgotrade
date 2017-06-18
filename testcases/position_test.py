@@ -27,7 +27,7 @@ import strategy_test
 from pyalgotrade import bar
 from pyalgotrade import strategy
 from pyalgotrade.strategy import position
-from pyalgotrade.barfeed import yahoofeed
+from pyalgotrade.barfeed import googlefeed
 from pyalgotrade.barfeed import csvfeed
 from pyalgotrade import barfeed
 from pyalgotrade.barfeed import membf
@@ -37,8 +37,8 @@ from pyalgotrade import marketsession
 
 
 def load_daily_barfeed(instrument):
-    barFeed = yahoofeed.Feed()
-    barFeed.addBarsFromCSV(instrument, common.get_data_file_path("orcl-2000-yahoofinance.csv"))
+    barFeed = googlefeed.Feed()
+    barFeed.addBarsFromCSV(instrument, common.get_data_file_path("orcl-2000-googlefinance.csv"))
     return barFeed
 
 
@@ -256,8 +256,8 @@ class BaseTestCase(common.TestCase):
         return barFeed
 
     def loadDailyBarFeed(self):
-        barFeed = yahoofeed.Feed()
-        barFeed.addBarsFromCSV(BaseTestCase.TestInstrument, common.get_data_file_path("orcl-2000-yahoofinance.csv"))
+        barFeed = googlefeed.Feed()
+        barFeed.addBarsFromCSV(BaseTestCase.TestInstrument, common.get_data_file_path("orcl-2000-googlefinance.csv"))
         return barFeed
 
     def createStrategy(self, useIntradayBarFeed=False):

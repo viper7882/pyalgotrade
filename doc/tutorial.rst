@@ -47,9 +47,9 @@ Optimizer
 Having said all that, the first thing that we'll need to test our strategies is some data.
 Let's use Oracle's stock prices for year 2000, which we'll download with the following command: ::
 
-    python -c "from pyalgotrade.tools import yahoofinance; yahoofinance.download_daily_bars('orcl', 2000, 'orcl-2000.csv')"
+    python -c "from pyalgotrade.tools import googlefinance; googlefinance.download_daily_bars('orcl', 2000, 'orcl-2000.csv')"
 
-The pyalgotrade.tools.yahoofinance package downloads CSV formatted data from Yahoo! Finance. 
+The pyalgotrade.tools.googlefinance package downloads CSV formatted data from Google Finance. 
 The orcl-2000.csv file should look like this: ::
 
     Date,Open,High,Low,Close,Volume,Adj Close
@@ -163,9 +163,9 @@ Long story short, **we need to go parallel**.
 
 Let's start by downloading 3 years of daily bars for 'Dow Jones Industrial Average': ::
 
-    python -c "from pyalgotrade.tools import yahoofinance; yahoofinance.download_daily_bars('dia', 2009, 'dia-2009.csv')"
-    python -c "from pyalgotrade.tools import yahoofinance; yahoofinance.download_daily_bars('dia', 2010, 'dia-2010.csv')" 
-    python -c "from pyalgotrade.tools import yahoofinance; yahoofinance.download_daily_bars('dia', 2011, 'dia-2011.csv')"
+    python -c "from pyalgotrade.tools import googlefinance; googlefinance.download_daily_bars('dia', 2009, 'dia-2009.csv')"
+    python -c "from pyalgotrade.tools import googlefinance; googlefinance.download_daily_bars('dia', 2010, 'dia-2010.csv')" 
+    python -c "from pyalgotrade.tools import googlefinance; googlefinance.download_daily_bars('dia', 2011, 'dia-2011.csv')"
 
 Save this code as rsi2.py:
 

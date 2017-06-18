@@ -16,9 +16,9 @@ CSV
     :members: BarFeed, GenericBarFeed
     :show-inheritance:
 
-Yahoo! Finance
+Google Finance
 --------------
-.. automodule:: pyalgotrade.barfeed.yahoofeed
+.. automodule:: pyalgotrade.barfeed.googlefeed
     :members: Feed
     :show-inheritance:
 

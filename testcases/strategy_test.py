@@ -24,7 +24,7 @@ import common
 
 from pyalgotrade import strategy
 from pyalgotrade import broker
-from pyalgotrade.barfeed import yahoofeed
+from pyalgotrade.barfeed import googlefeed
 
 
 def get_by_datetime_or_date(dict_, dateTimeOrDate):
@@ -80,8 +80,8 @@ class StrategyTestCase(common.TestCase):
     TestInstrument = "doesntmatter"
 
     def loadDailyBarFeed(self):
-        barFeed = yahoofeed.Feed()
-        barFeed.addBarsFromCSV(StrategyTestCase.TestInstrument, common.get_data_file_path("orcl-2000-yahoofinance.csv"))
+        barFeed = googlefeed.Feed()
+        barFeed.addBarsFromCSV(StrategyTestCase.TestInstrument, common.get_data_file_path("orcl-2000-googlefinance.csv"))
         return barFeed
 
     def createStrategy(self):

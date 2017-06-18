@@ -23,7 +23,7 @@ import os
 
 import common
 
-from pyalgotrade.barfeed import yahoofeed
+from pyalgotrade.barfeed import googlefeed
 from pyalgotrade import plotter
 
 sys.path.append("samples")
@@ -33,8 +33,8 @@ import sma_crossover
 class PlotterTestCase(common.TestCase):
     def testDownloadAndParseDaily(self):
         instrument = "orcl"
-        barFeed = yahoofeed.Feed()
-        barFeed.addBarsFromCSV(instrument, common.get_data_file_path("orcl-2000-yahoofinance.csv"))
+        barFeed = googlefeed.Feed()
+        barFeed.addBarsFromCSV(instrument, common.get_data_file_path("orcl-2000-googlefinance.csv"))
         strat = sma_crossover.SMACrossOver(barFeed, instrument, 20)
         plt = plotter.StrategyPlotter(strat, True, True, True)
         plt.getInstrumentSubplot(instrument).addDataSeries("sma", strat.getSMA())

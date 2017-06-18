@@ -24,7 +24,7 @@ import common
 import strategy_test
 import position_test
 
-from pyalgotrade.barfeed import yahoofeed
+from pyalgotrade.barfeed import googlefeed
 from pyalgotrade.barfeed import csvfeed
 from pyalgotrade.stratanalyzer import returns
 from pyalgotrade import broker
@@ -275,9 +275,9 @@ class AnalyzerTestCase(common.TestCase):
 
     def testOneBarReturn(self):
         initialCash = 1000
-        barFeed = yahoofeed.Feed()
+        barFeed = googlefeed.Feed()
         barFeed.setBarFilter(csvfeed.DateRangeFilter(datetime.datetime(2001, 12, 07), datetime.datetime(2001, 12, 07)))
-        barFeed.addBarsFromCSV(AnalyzerTestCase.TestInstrument, common.get_data_file_path("orcl-2001-yahoofinance.csv"))
+        barFeed.addBarsFromCSV(AnalyzerTestCase.TestInstrument, common.get_data_file_path("orcl-2001-googlefinance.csv"))
         strat = strategy_test.TestStrategy(barFeed, initialCash)
 
         # 2001-12-07,15.74,15.95,15.55,15.91,42463200,15.56
@@ -298,9 +298,9 @@ class AnalyzerTestCase(common.TestCase):
 
     def testTwoBarReturns_OpenOpen(self):
         initialCash = 15.61
-        barFeed = yahoofeed.Feed()
+        barFeed = googlefeed.Feed()
         barFeed.setBarFilter(csvfeed.DateRangeFilter(datetime.datetime(2001, 12, 06), datetime.datetime(2001, 12, 07)))
-        barFeed.addBarsFromCSV(AnalyzerTestCase.TestInstrument, common.get_data_file_path("orcl-2001-yahoofinance.csv"))
+        barFeed.addBarsFromCSV(AnalyzerTestCase.TestInstrument, common.get_data_file_path("orcl-2001-googlefinance.csv"))
         strat = strategy_test.TestStrategy(barFeed, initialCash)
 
         # 2001-12-06,15.61,16.03,15.50,15.90,66944900,15.55
@@ -321,9 +321,9 @@ class AnalyzerTestCase(common.TestCase):
 
     def testTwoBarReturns_OpenClose(self):
         initialCash = 15.61
-        barFeed = yahoofeed.Feed()
+        barFeed = googlefeed.Feed()
         barFeed.setBarFilter(csvfeed.DateRangeFilter(datetime.datetime(2001, 12, 06), datetime.datetime(2001, 12, 07)))
-        barFeed.addBarsFromCSV(AnalyzerTestCase.TestInstrument, common.get_data_file_path("orcl-2001-yahoofinance.csv"))
+        barFeed.addBarsFromCSV(AnalyzerTestCase.TestInstrument, common.get_data_file_path("orcl-2001-googlefinance.csv"))
         strat = strategy_test.TestStrategy(barFeed, initialCash)
 
         # 2001-12-06,15.61,16.03,15.50,15.90,66944900,15.55
@@ -344,9 +344,9 @@ class AnalyzerTestCase(common.TestCase):
 
     def testTwoBarReturns_CloseOpen(self):
         initialCash = 15.9
-        barFeed = yahoofeed.Feed()
+        barFeed = googlefeed.Feed()
         barFeed.setBarFilter(csvfeed.DateRangeFilter(datetime.datetime(2001, 12, 06), datetime.datetime(2001, 12, 07)))
-        barFeed.addBarsFromCSV(AnalyzerTestCase.TestInstrument, common.get_data_file_path("orcl-2001-yahoofinance.csv"))
+        barFeed.addBarsFromCSV(AnalyzerTestCase.TestInstrument, common.get_data_file_path("orcl-2001-googlefinance.csv"))
         strat = strategy_test.TestStrategy(barFeed, initialCash)
 
         # 2001-12-06,15.61,16.03,15.50,15.90,66944900,15.55
@@ -367,9 +367,9 @@ class AnalyzerTestCase(common.TestCase):
 
     def testTwoBarReturns_CloseClose(self):
         initialCash = 15.90
-        barFeed = yahoofeed.Feed()
+        barFeed = googlefeed.Feed()
         barFeed.setBarFilter(csvfeed.DateRangeFilter(datetime.datetime(2001, 12, 06), datetime.datetime(2001, 12, 07)))
-        barFeed.addBarsFromCSV(AnalyzerTestCase.TestInstrument, common.get_data_file_path("orcl-2001-yahoofinance.csv"))
+        barFeed.addBarsFromCSV(AnalyzerTestCase.TestInstrument, common.get_data_file_path("orcl-2001-googlefinance.csv"))
         strat = strategy_test.TestStrategy(barFeed, initialCash)
 
         # 2001-12-06,15.61,16.03,15.50,15.90,66944900,15.55
@@ -390,8 +390,8 @@ class AnalyzerTestCase(common.TestCase):
 
     def testCumulativeReturn(self):
         initialCash = 33.06
-        barFeed = yahoofeed.Feed()
-        barFeed.addBarsFromCSV(AnalyzerTestCase.TestInstrument, common.get_data_file_path("orcl-2001-yahoofinance.csv"))
+        barFeed = googlefeed.Feed()
+        barFeed.addBarsFromCSV(AnalyzerTestCase.TestInstrument, common.get_data_file_path("orcl-2001-googlefinance.csv"))
         strat = position_test.TestStrategy(barFeed, AnalyzerTestCase.TestInstrument, initialCash)
 
         strat.addPosEntry(datetime.datetime(2001, 1, 12), strat.enterLong, AnalyzerTestCase.TestInstrument, 1)  # 33.06
@@ -407,8 +407,8 @@ class AnalyzerTestCase(common.TestCase):
 
     def testGoogle2011(self):
         initialValue = 1000000
-        barFeed = yahoofeed.Feed()
-        barFeed.addBarsFromCSV(AnalyzerTestCase.TestInstrument, common.get_data_file_path("goog-2011-yahoofinance.csv"))
+        barFeed = googlefeed.Feed()
+        barFeed.addBarsFromCSV(AnalyzerTestCase.TestInstrument, common.get_data_file_path("goog-2011-googlefinance.csv"))
 
         strat = strategy_test.TestStrategy(barFeed, initialValue)
         order = strat.getBroker().createMarketOrder(broker.Order.Action.BUY, AnalyzerTestCase.TestInstrument, 1654, True)  # 2011-01-03 close: 604.35
@@ -422,9 +422,9 @@ class AnalyzerTestCase(common.TestCase):
         self.assertEqual(round(stratAnalyzer.getCumulativeReturns()[-1], 4), round((finalValue - initialValue) / float(initialValue), 4))
 
     def testMultipleInstrumentsInterleaved(self):
-        barFeed = yahoofeed.Feed()
-        barFeed.addBarsFromCSV("spy", common.get_data_file_path("spy-2010-yahoofinance.csv"), marketsession.NYSE.getTimezone())
-        barFeed.addBarsFromCSV("nikkei", common.get_data_file_path("nikkei-2010-yahoofinance.csv"), marketsession.TSE.getTimezone())
+        barFeed = googlefeed.Feed()
+        barFeed.addBarsFromCSV("spy", common.get_data_file_path("spy-2010-googlefinance.csv"), marketsession.NYSE.getTimezone())
+        barFeed.addBarsFromCSV("nikkei", common.get_data_file_path("nikkei-2010-googlefinance.csv"), marketsession.TSE.getTimezone())
 
         strat = strategy_test.TestStrategy(barFeed, 1000)
         stratAnalyzer = returns.Returns()
@@ -437,8 +437,8 @@ class AnalyzerTestCase(common.TestCase):
 
     def testFirstBar(self):
         initialCash = 1000
-        barFeed = yahoofeed.Feed()
-        barFeed.addBarsFromCSV(AnalyzerTestCase.TestInstrument, common.get_data_file_path("orcl-2001-yahoofinance.csv"))
+        barFeed = googlefeed.Feed()
+        barFeed.addBarsFromCSV(AnalyzerTestCase.TestInstrument, common.get_data_file_path("orcl-2001-googlefinance.csv"))
         strat = strategy_test.TestStrategy(barFeed, initialCash)
 
         strat.addOrder(datetime.datetime(2001, 01, 02), strat.getBroker().createMarketOrder, broker.Order.Action.BUY, AnalyzerTestCase.TestInstrument, 1, False)  # 2001-01-03 Open: 25.25 Close: 32.00

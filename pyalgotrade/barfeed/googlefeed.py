@@ -82,6 +82,8 @@ class RowParser(csvfeed.RowParser):
     def parseBar(self, csvRowDict):
         dateTime = self.__parseDate(csvRowDict["Date"])
         close = float(csvRowDict["Close"])
+        if csvRowDict["Open"] == '-':
+            return
         open_ = float(csvRowDict["Open"])
         high = float(csvRowDict["High"])
         low = float(csvRowDict["Low"])

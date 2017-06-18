@@ -33,12 +33,12 @@ from pyalgotrade.utils import dt
 class TestCase(common.TestCase):
     def testBaseFeedInterface(self):
         feed = csvfeed.Feed("Date", "%Y-%m-%d")
-        feed.addValuesFromCSV(common.get_data_file_path("orcl-2000-yahoofinance.csv"))
+        feed.addValuesFromCSV(common.get_data_file_path("orcl-2000-googlefinance.csv"))
         feed_test.tstBaseFeedInterface(self, feed)
 
     def testFeedWithBars(self):
         feed = csvfeed.Feed("Date", "%Y-%m-%d")
-        feed.addValuesFromCSV(common.get_data_file_path("orcl-2000-yahoofinance.csv"))
+        feed.addValuesFromCSV(common.get_data_file_path("orcl-2000-googlefinance.csv"))
 
         self.assertEqual(len(feed.getKeys()), 6)
         for col in ["Open", "High", "Low", "Close", "Volume", "Adj Close"]:
@@ -89,7 +89,7 @@ class TestCase(common.TestCase):
 
     def testReset(self):
         feed = csvfeed.Feed("Date", "%Y-%m-%d")
-        feed.addValuesFromCSV(common.get_data_file_path("orcl-2000-yahoofinance.csv"))
+        feed.addValuesFromCSV(common.get_data_file_path("orcl-2000-googlefinance.csv"))
 
         disp = dispatcher.Dispatcher()
         disp.addSubject(feed)

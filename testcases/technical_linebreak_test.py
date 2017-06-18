@@ -21,7 +21,7 @@
 import common
 
 from pyalgotrade.technical import linebreak
-from pyalgotrade.barfeed import yahoofeed
+from pyalgotrade.barfeed import googlefeed
 
 
 class LineBreakTestCase(common.TestCase):
@@ -29,8 +29,8 @@ class LineBreakTestCase(common.TestCase):
 
     def __getFeed(self):
         # Load the feed and process all bars.
-        barFeed = yahoofeed.Feed()
-        barFeed.addBarsFromCSV(LineBreakTestCase.Instrument, common.get_data_file_path("orcl-2001-yahoofinance.csv"))
+        barFeed = googlefeed.Feed()
+        barFeed.addBarsFromCSV(LineBreakTestCase.Instrument, common.get_data_file_path("orcl-2001-googlefinance.csv"))
         return barFeed
 
     def test2LineBreak(self):
