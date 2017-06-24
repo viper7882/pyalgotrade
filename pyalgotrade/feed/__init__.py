@@ -18,6 +18,9 @@
 .. moduleauthor:: Gabriel Martin Becedillas Ruiz <gabriel.becedillas@gmail.com>
 """
 
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import abc
 
 from pyalgotrade import observer
@@ -104,6 +107,7 @@ class BaseFeed(observer.Subject):
 
     def dispatch(self):
         dateTime, values = self.getNextValuesAndUpdateDS()
+        #print ('feed dispatch -> getNextValuesAndUpdateDS, type dateTime = ', str(type(dateTime)), ', value dateTime = ', str(dateTime), ', type values = ', str(type(values)), ', value values = ', str(values))
         if dateTime is not None:
             self.__event.emit(dateTime, values)
         return dateTime is not None

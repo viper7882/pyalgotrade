@@ -49,6 +49,8 @@ class WaitingEntryState(PositionState):
             raise Exception("The entry order is still active")
 
     def onOrderEvent(self, position, orderEvent):
+        #print ('WaitingEntryState.onOrderEvent')
+
         # Only entry order events are valid in this state.
         assert(position.getEntryOrder().getId() == orderEvent.getOrder().getId())
 
@@ -79,6 +81,7 @@ class OpenState(PositionState):
         pass
 
     def onOrderEvent(self, position, orderEvent):
+        #print ('OpenState.onOrderEvent')
         if position.getExitOrder() and position.getExitOrder().getId() == orderEvent.getOrder().getId():
             if orderEvent.getEventType() == broker.OrderEvent.Type.FILLED:
                 if position.getShares() == 0:
@@ -366,6 +369,8 @@ class Position(object):
         self.__exitOrder = exitOrder
 
     def onOrderEvent(self, orderEvent):
+        #print ('Position.onOrderEvent')
+
         self.__updatePosTracker(orderEvent)
 
         order = orderEvent.getOrder()

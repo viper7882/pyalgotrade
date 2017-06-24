@@ -18,6 +18,9 @@
 .. moduleauthor:: Gabriel Martin Becedillas Ruiz <gabriel.becedillas@gmail.com>
 """
 
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import abc
 import logging
 
@@ -483,6 +486,7 @@ class BaseStrategy(object):
         self.onIdle()
 
     def __onOrderEvent(self, broker_, orderEvent):
+        #print ("__onOrderEvent, broker_ = %s" % (str(broker_)), ", orderEvent = %s" % (str(orderEvent)))
         order = orderEvent.getOrder()
         self.onOrderUpdated(order)
 
@@ -493,6 +497,7 @@ class BaseStrategy(object):
             if not order.isActive():
                 self.unregisterPositionOrder(pos, order)
 
+            #print ('__onOrderEvent -> Position.onOrderEvent')
             pos.onOrderEvent(orderEvent)
 
     def __onBars(self, dateTime, bars):
@@ -515,6 +520,22 @@ class BaseStrategy(object):
             self.onFinish(self.__barFeed.getCurrentBars())
         else:
             raise Exception("Feed was empty")
+
+    def step(self):
+        """Can call multiple times to step the strategy."""
+        """Return True if can be continue, else False"""
+        ret = self.__dispatcher.step()
+
+        if self.__barFeed.getCurrentBars() is not None:
+            self.onFinish(self.__barFeed.getCurrentBars())
+        else:
+            raise Exception("Feed was empty")
+        return ret
+
+    def ended(self):
+        ret = self.__dispatcher.ended()
+        #print ('strategy, ended, ret = ', str(ret))
+        return ret
 
     def stop(self):
         """Stops a running strategy."""

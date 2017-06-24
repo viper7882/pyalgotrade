@@ -18,6 +18,9 @@
 .. moduleauthor:: Gabriel Martin Becedillas Ruiz <gabriel.becedillas@gmail.com>
 """
 
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import abc
 
 from pyalgotrade import observer
@@ -91,6 +94,7 @@ class Order(object):
     """
 
     class Action(object):
+        NO_OP = 0
         BUY = 1
         BUY_TO_COVER = 2
         SELL = 3
@@ -506,12 +510,14 @@ class Broker(observer.Subject):
         return dispatchprio.BROKER
 
     def notifyOrderEvent(self, orderEvent):
+        #print ("Broker, notifyOrderEvent -> __orderEvent.emit, orderEvent = %s" % (str(orderEvent)))
         self.__orderEvent.emit(self, orderEvent)
 
     # Handlers should expect 2 parameters:
     # 1: broker instance
     # 2: OrderEvent instance
     def getOrderUpdatedEvent(self):
+        #print ("Broker, getOrderUpdatedEvent")
         return self.__orderEvent
 
     @abc.abstractmethod

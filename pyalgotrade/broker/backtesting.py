@@ -18,6 +18,9 @@
 .. moduleauthor:: Gabriel Martin Becedillas Ruiz <gabriel.becedillas@gmail.com>
 """
 
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 import abc
 
 from pyalgotrade import broker
@@ -310,6 +313,7 @@ class Broker(broker.Broker):
 
     # Tries to commit an order execution.
     def commitOrderExecution(self, order, dateTime, fillInfo):
+        #print ("backtesting, commitOrderExecution, order = %s" % (str(order)))
         price = fillInfo.getPrice()
         quantity = fillInfo.getQuantity()
 
@@ -367,6 +371,7 @@ class Broker(broker.Broker):
             ))
 
     def submitOrder(self, order):
+        #print ("backtesting, submitOrder, order = %s" % (str(order)))
         if order.isInitial():
             order.setSubmitted(self._getNextOrderId(), self._getCurrentDateTime())
             self._registerOrder(order)
@@ -378,6 +383,7 @@ class Broker(broker.Broker):
 
     # Return True if further processing is needed.
     def __preProcessOrder(self, order, bar_):
+        #print ("backtesting, __preProcessOrder, order = %s" % (str(order)))
         ret = True
 
         # For non-GTC orders we need to check if the order has expired.
@@ -394,6 +400,7 @@ class Broker(broker.Broker):
         return ret
 
     def __postProcessOrder(self, order, bar_):
+        #print ("backtesting, __postProcessOrder, order = %s" % (str(order)))
         # For non-GTC orders and daily (or greater) bars we need to check if orders should expire right now
         # before waiting for the next bar.
         if not order.getGoodTillCanceled():
@@ -408,6 +415,7 @@ class Broker(broker.Broker):
                 self.notifyOrderEvent(broker.OrderEvent(order, broker.OrderEvent.Type.CANCELED, "Expired"))
 
     def __processOrder(self, order, bar_):
+        #print ("backtesting, __processOrder, order = %s" % (str(order)))
         if not self.__preProcessOrder(order, bar_):
             return
 
@@ -420,6 +428,7 @@ class Broker(broker.Broker):
             self.__postProcessOrder(order, bar_)
 
     def __onBarsImpl(self, order, bars):
+        #print ("backtesting, __onBarsImpl, order = %s" % (str(order)))
         # IF WE'RE DEALING WITH MULTIPLE INSTRUMENTS WE SKIP ORDER PROCESSING IF THERE IS NO BAR FOR THE ORDER'S
         # INSTRUMENT TO GET THE SAME BEHAVIOUR AS IF WERE BE PROCESSING ONLY ONE INSTRUMENT.
         bar_ = bars.getBar(order.getInstrument())
@@ -440,6 +449,7 @@ class Broker(broker.Broker):
                 assert(order not in self.__activeOrders)
 
     def onBars(self, dateTime, bars):
+        #print ("backtesting, onBars")
         # Let the fill strategy know that new bars are being processed.
         self.__fillStrategy.onBars(self, bars)
 
@@ -466,6 +476,7 @@ class Broker(broker.Broker):
         return self.__barFeed.eof()
 
     def dispatch(self):
+        #print ('backtesting dispatch')
         # All events were already emitted while handling barfeed events.
         pass
 
@@ -473,6 +484,7 @@ class Broker(broker.Broker):
         return None
 
     def createMarketOrder(self, action, instrument, quantity, onClose=False):
+        #print ("backtesting, createMarketOrder, action = %s, instrument = %s, quantity = %d" % (str(action), str(instrument), quantity))
         # In order to properly support market-on-close with intraday feeds I'd need to know about different
         # exchange/market trading hours and support specifying routing an order to a specific exchange/market.
         # Even if I had all this in place it would be a problem while paper-trading with a live feed since
@@ -486,12 +498,14 @@ class Broker(broker.Broker):
         return LimitOrder(action, instrument, limitPrice, quantity, self.getInstrumentTraits(instrument))
 
     def createStopOrder(self, action, instrument, stopPrice, quantity):
+        #print ("backtesting, createStopOrder, action = %s, instrument = %s, quantity = %d" % (str(action), str(instrument), quantity))
         return StopOrder(action, instrument, stopPrice, quantity, self.getInstrumentTraits(instrument))
 
     def createStopLimitOrder(self, action, instrument, stopPrice, limitPrice, quantity):
         return StopLimitOrder(action, instrument, stopPrice, limitPrice, quantity, self.getInstrumentTraits(instrument))
 
     def cancelOrder(self, order):
+        #print ("backtesting, cancelOrder, order = %s" % (str(order)))
         activeOrder = self.__activeOrders.get(order.getId())
         if activeOrder is None:
             raise Exception("The order is not active anymore")

@@ -31,6 +31,7 @@ setup(
     author_email='pyalgotrade@gmail.com',
     url='http://gbeced.github.io/pyalgotrade/',
     download_url='http://sourceforge.net/projects/pyalgotrade/files/0.18/PyAlgoTrade-0.18.tar.gz/download',
+    zip_safe=False,
     packages=[
         'pyalgotrade',
         'pyalgotrade.barfeed',

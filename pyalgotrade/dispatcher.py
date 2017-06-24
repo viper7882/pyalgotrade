@@ -18,6 +18,9 @@
 .. moduleauthor:: Gabriel Martin Becedillas Ruiz <gabriel.becedillas@gmail.com>
 """
 
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 from pyalgotrade import utils
 from pyalgotrade import observer
 from pyalgotrade import dispatchprio
@@ -31,6 +34,8 @@ class Dispatcher(object):
         self.__startEvent = observer.Event()
         self.__idleEvent = observer.Event()
         self.__currDateTime = None
+        self.__started = False
+        self.__ended = False
 
     # Returns the current event datetime. It may be None for events from realtime subjects.
     def getCurrentDateTime(self):
@@ -43,6 +48,7 @@ class Dispatcher(object):
         return self.__idleEvent
 
     def stop(self):
+        #print ('step, stop')
         self.__stop = True
 
     def getSubjects(self):
@@ -55,6 +61,7 @@ class Dispatcher(object):
 
         # If the subject has no specific dispatch priority put it right at the end.
         if subject.getDispatchPriority() is dispatchprio.LAST:
+            #print ('addSubject, append type subject = ', str(type(subject)), ', value subject = ', str(subject))
             self.__subjects.append(subject)
         else:
             # Find the position according to the subject's priority.
@@ -63,6 +70,7 @@ class Dispatcher(object):
                 if s.getDispatchPriority() is dispatchprio.LAST or subject.getDispatchPriority() < s.getDispatchPriority():
                     break
                 pos += 1
+            #print ('addSubject, insert type subject = ', str(type(subject)), ', value subject = ', str(subject))
             self.__subjects.insert(pos, subject)
 
         subject.onDispatcherRegistered(self)
@@ -72,6 +80,7 @@ class Dispatcher(object):
         ret = False
         # Dispatch if the datetime is currEventDateTime of if its a realtime subject.
         if not subject.eof() and subject.peekDateTime() in (None, currEventDateTime):
+            #print ('__dispatchSubject -> dispatch, type subject = ', str(type(subject)), ', value subject = ', str(subject))
             ret = subject.dispatch() is True
         return ret
 
@@ -94,6 +103,7 @@ class Dispatcher(object):
             self.__currDateTime = smallestDateTime
 
             for subject in self.__subjects:
+                #print ('__dispatch -> __dispatchSubject, type subject = ', str(type(subject)), ', value subject = ', str(subject))
                 if self.__dispatchSubject(subject, smallestDateTime):
                     eventsDispatched = True
         return eof, eventsDispatched
@@ -116,3 +126,38 @@ class Dispatcher(object):
                 subject.stop()
             for subject in self.__subjects:
                 subject.join()
+
+    def step(self):
+        """Can call multiple times to step the strategy."""
+        """Return True if can be continued, else False"""
+        if self.__ended == False:
+            if self.__started == False:
+                for subject in self.__subjects:
+                    subject.start()
+
+                self.__startEvent.emit()
+
+            #print ('step, self.__stop = ', str(self.__stop))
+            if not self.__stop:
+                eof, eventsDispatched = self.__dispatch()
+                #print ('step, type eof = ', str(type(eof)), ', value eof = ', str(eof), ', type eventsDispatched = ', str(type(eventsDispatched)), ', value eventsDispatched = ', str(eventsDispatched))
+                if eof:
+                    #print ('step, eof = ', str(eof))
+                    self.__stop = True
+                elif not eventsDispatched:
+                    self.__idleEvent.emit()
+
+            if (self.__ended == False) and (self.__stop == True):
+                for subject in self.__subjects:
+                    subject.stop()
+                for subject in self.__subjects:
+                    subject.join()
+                self.__ended = True
+                #print ('step, self.__ended = ', str(self.__ended))
+        #print ('dispatcher, step, __started = ', str(self.__started), ', __stop = ', str(self.__stop), ', __ended = ', str(self.__ended))
+        return not self.ended()
+
+    def ended(self):
+        """Return True if can be continued, else False"""
+        #print ('dispatcher, ended, self.__ended = ', str(self.__ended))
+        return self.__ended
