@@ -18,6 +18,9 @@
 .. moduleauthor:: Gabriel Martin Becedillas Ruiz <gabriel.becedillas@gmail.com>
 """
 
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
 from pyalgotrade.utils import dt
 from pyalgotrade.utils import csvutils
 from pyalgotrade.barfeed import membf
@@ -49,13 +52,17 @@ class DateRangeFilter(BarFilter):
     def __init__(self, fromDate=None, toDate=None):
         self.__fromDate = fromDate
         self.__toDate = toDate
+        #print ('DateRangeFilter, __init__, fromDate = %s, toDate = %s' % (str(self.__fromDate), str(self.__toDate)))
 
     def includeBar(self, bar_):
+        include_bar_within_datetime = True
         if self.__toDate and bar_.getDateTime() > self.__toDate:
-            return False
+            include_bar_within_datetime = False
         if self.__fromDate and bar_.getDateTime() < self.__fromDate:
-            return False
-        return True
+            include_bar_within_datetime = False
+        #print ('DateRangeFilter, includeBar, include_bar_within_datetime = %d, bar DateTime = %s, fromDate = %s, toDate = %s' \
+        #        % (include_bar_within_datetime, str(bar_.getDateTime()), str(self.__fromDate), str(self.__toDate)))
+        return include_bar_within_datetime
 
 
 # US Equities Regular Trading Hours filter
@@ -71,6 +78,7 @@ class USEquitiesRTH(DateRangeFilter):
         self.__toTime = datetime.time(16, 0, 0)
 
     def includeBar(self, bar_):
+        #print ('USEquitiesRTH, includeBar')
         ret = super(USEquitiesRTH, self).includeBar(bar_)
         if ret:
             # Check day of week
@@ -113,12 +121,16 @@ class BarFeed(membf.BarFeed):
         self.__barFilter = barFilter
 
     def addBarsFromCSV(self, instrument, path, rowParser):
+        #print ('addBarsFromCSV')
         # Load the csv file
         loadedBars = []
         reader = csvutils.FastDictReader(open(path, "r"), fieldnames=rowParser.getFieldNames(), delimiter=rowParser.getDelimiter())
         for row in reader:
             bar_ = rowParser.parseBar(row)
+            #if bar_ is not None:
+            #    print ('addBarsFromCSV, bar Datetime = %s' % (str(bar_.getDateTime())))
             if bar_ is not None and (self.__barFilter is None or self.__barFilter.includeBar(bar_)):
+                #print ('addBarsFromCSV, added bar Datetime = %s' % (str(bar_.getDateTime())))
                 loadedBars.append(bar_)
 
         self.addBarsFromSequence(instrument, loadedBars)

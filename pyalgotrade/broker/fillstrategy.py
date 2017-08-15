@@ -315,6 +315,7 @@ class DefaultStrategy(FillStrategy):
         return ret
 
     def fillMarketOrder(self, broker_, order, bar):
+        broker_.getLogger().debug('fillMarketOrder')
         # Calculate the fill size for the order.
         fillSize = self.__calculateFillSize(broker_, order, bar)
         if fillSize == 0:
@@ -329,8 +330,10 @@ class DefaultStrategy(FillStrategy):
 
         # Unless its a fill-on-close order, use the open price.
         if order.getFillOnClose():
+            broker_.getLogger().debug('fillMarketOrder -> getFillOnClose()')
             price = bar.getClose(broker_.getUseAdjustedValues())
         else:
+            broker_.getLogger().debug('fillMarketOrder -> getFillOnOpen()')
             price = bar.getOpen(broker_.getUseAdjustedValues())
         assert price is not None
 
@@ -339,6 +342,7 @@ class DefaultStrategy(FillStrategy):
             price = self.__slippageModel.calculatePrice(
                 order, price, fillSize, bar, self.__volumeUsed[order.getInstrument()]
             )
+        broker_.getLogger().debug('fillMarketOrder, return FillInfo')
         return FillInfo(price, fillSize)
 
     def fillLimitOrder(self, broker_, order, bar):

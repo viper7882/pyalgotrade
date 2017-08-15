@@ -232,7 +232,7 @@ class Order(object):
 
     def isActive(self):
         """Returns True if the order is active."""
-        return self.__state not in [Order.State.CANCELED, Order.State.FILLED]
+        return self.__state != Order.State.CANCELED
 
     def isInitial(self):
         """Returns True if the order state is Order.State.INITIAL."""
@@ -329,15 +329,17 @@ class Order(object):
         self.__commissions += orderExecutionInfo.getCommission()
 
         if self.getRemaining() == 0:
+            print ('Broker, addExecutionInfo, switchState FILLED')
             self.switchState(Order.State.FILLED)
         else:
             assert(not self.__allOrNone)
+            print ('Broker, addExecutionInfo, switchState PARTIALLY_FILLED')
             self.switchState(Order.State.PARTIALLY_FILLED)
 
     def switchState(self, newState):
         validTransitions = Order.VALID_TRANSITIONS.get(self.__state, [])
         if newState not in validTransitions:
-            raise Exception("Invalid order state transition from %s to %s" % (Order.State.toString(self.__state), Order.State.toString(newState)))
+            raise Exception('Invalid order state transition from %s to %s' % (Order.State.toString(self.__state), Order.State.toString(newState)))
         else:
             self.__state = newState
 
@@ -510,14 +512,14 @@ class Broker(observer.Subject):
         return dispatchprio.BROKER
 
     def notifyOrderEvent(self, orderEvent):
-        #print ("Broker, notifyOrderEvent -> __orderEvent.emit, orderEvent = %s" % (str(orderEvent)))
+        print ('Broker, notifyOrderEvent -> __orderEvent.emit, orderEvent = %s' % (str(orderEvent)))
         self.__orderEvent.emit(self, orderEvent)
 
     # Handlers should expect 2 parameters:
     # 1: broker instance
     # 2: OrderEvent instance
     def getOrderUpdatedEvent(self):
-        #print ("Broker, getOrderUpdatedEvent")
+        print ('Broker, getOrderUpdatedEvent')
         return self.__orderEvent
 
     @abc.abstractmethod

@@ -105,6 +105,8 @@ class BaseStrategy(object):
 
     def registerPositionOrder(self, position, order):
         self.__activePositions.add(position)
+        if order.getId() is not None:
+            self.debug ('registerPositionOrder, position = %s, order[%d] = %s' % (str(position), order.getId(), str(order)))
         assert(order.isActive())  # Why register an inactive order ?
         self.__orderToPosition[order.getId()] = position
 
@@ -273,6 +275,7 @@ class BaseStrategy(object):
         :rtype: The :class:`pyalgotrade.strategy.position.Position` entered.
         """
 
+        self.debug ('enterLong, return LongPosition')
         return pyalgotrade.strategy.position.LongPosition(self, instrument, None, None, quantity, goodTillCanceled, allOrNone)
 
     def enterShort(self, instrument, quantity, goodTillCanceled=False, allOrNone=False):
@@ -289,6 +292,7 @@ class BaseStrategy(object):
         :rtype: The :class:`pyalgotrade.strategy.position.Position` entered.
         """
 
+        self.debug ('enterShort, return ShortPosition')
         return pyalgotrade.strategy.position.ShortPosition(self, instrument, None, None, quantity, goodTillCanceled, allOrNone)
 
     def enterLongLimit(self, instrument, limitPrice, quantity, goodTillCanceled=False, allOrNone=False):
@@ -486,30 +490,35 @@ class BaseStrategy(object):
         self.onIdle()
 
     def __onOrderEvent(self, broker_, orderEvent):
-        #print ("__onOrderEvent, broker_ = %s" % (str(broker_)), ", orderEvent = %s" % (str(orderEvent)))
+        self.debug ('__onOrderEvent, broker_ = %s, orderEvent = %s' % ((str(broker_)), str(orderEvent)))
         order = orderEvent.getOrder()
         self.onOrderUpdated(order)
 
         # Notify the position about the order event.
         pos = self.__orderToPosition.get(order.getId(), None)
+        if order.getId() is not None:
+            self.debug ('__onOrderEvent, order[%d], pos = %s' % (order.getId(), str(pos)))
         if pos is not None:
             # Unlink the order from the position if its not active anymore.
             if not order.isActive():
                 self.unregisterPositionOrder(pos, order)
 
-            #print ('__onOrderEvent -> Position.onOrderEvent')
+            self.debug ('__onOrderEvent -> Position.onOrderEvent')
             pos.onOrderEvent(orderEvent)
 
     def __onBars(self, dateTime, bars):
         # THE ORDER HERE IS VERY IMPORTANT
 
         # 1: Let analyzers process bars.
+        self.debug ('__onBars -> __notifyAnalyzers')
         self.__notifyAnalyzers(lambda s: s.beforeOnBars(self, bars))
 
         # 2: Let the strategy process current bars and submit orders.
+        self.debug ('__onBars -> onBars')
         self.onBars(bars)
 
         # 3: Notify that the bars were processed.
+        self.debug ('__onBars -> __barsProcessedEvent, bars')
         self.__barsProcessedEvent.emit(self, bars)
 
     def run(self):
@@ -524,17 +533,21 @@ class BaseStrategy(object):
     def step(self):
         """Can call multiple times to step the strategy."""
         """Return True if can be continue, else False"""
+        self.debug ('step')
         ret = self.__dispatcher.step()
+        self.debug ('step, ret = %s' % str(ret))
 
         if self.__barFeed.getCurrentBars() is not None:
+            self.debug ('step, onFinish')
             self.onFinish(self.__barFeed.getCurrentBars())
         else:
             raise Exception("Feed was empty")
         return ret
 
     def ended(self):
+        self.debug ('ended')
         ret = self.__dispatcher.ended()
-        #print ('strategy, ended, ret = ', str(ret))
+        self.debug ('ended, ret = %s' % str(ret))
         return ret
 
     def stop(self):

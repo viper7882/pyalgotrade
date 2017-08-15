@@ -49,16 +49,18 @@ class WaitingEntryState(PositionState):
             raise Exception("The entry order is still active")
 
     def onOrderEvent(self, position, orderEvent):
-        #print ('WaitingEntryState.onOrderEvent')
+        print ('WaitingEntryState.onOrderEvent')
 
         # Only entry order events are valid in this state.
         assert(position.getEntryOrder().getId() == orderEvent.getOrder().getId())
 
         if orderEvent.getEventType() in (broker.OrderEvent.Type.FILLED, broker.OrderEvent.Type.PARTIALLY_FILLED):
+            print ('WaitingEntryState.onOrderEvent, order[%d], switchState to OpenState()' % (orderEvent.getOrder().getId()))
             position.switchState(OpenState())
             position.getStrategy().onEnterOk(position)
         elif orderEvent.getEventType() == broker.OrderEvent.Type.CANCELED:
             assert(position.getEntryOrder().getFilled() == 0)
+            print ('WaitingEntryState.onOrderEvent, order[%d], switchState to ClosedState()' % (orderEvent.getOrder().getId()))
             position.switchState(ClosedState())
             position.getStrategy().onEnterCanceled(position)
 
@@ -75,18 +77,23 @@ class OpenState(PositionState):
     def onEnter(self, position):
         entryDateTime = position.getEntryOrder().getExecutionInfo().getDateTime()
         position.setEntryDateTime(entryDateTime)
+        print ('OpenState.onEnter, entryDateTime: %s' % str(entryDateTime))
 
     def canSubmitOrder(self, position, order):
         # Only exit orders should be submitted in this state.
         pass
 
     def onOrderEvent(self, position, orderEvent):
-        #print ('OpenState.onOrderEvent')
+        print ('OpenState.onOrderEvent')
         if position.getExitOrder() and position.getExitOrder().getId() == orderEvent.getOrder().getId():
             if orderEvent.getEventType() == broker.OrderEvent.Type.FILLED:
                 if position.getShares() == 0:
+                    print ('OpenState.onOrderEvent, order[%d], switchState to ClosedState()' % (orderEvent.getOrder().getId()))
                     position.switchState(ClosedState())
                     position.getStrategy().onExitOk(position)
+                #else:
+                #    print ('OpenState.onOrderEvent, order[%d], onEnterOk' % (orderEvent.getOrder().getId()))
+                #    position.getStrategy().onEnterOk(position)
             elif orderEvent.getEventType() == broker.OrderEvent.Type.CANCELED:
                 assert(position.getShares() != 0)
                 position.getStrategy().onExitCanceled(position)
@@ -171,6 +178,7 @@ class Position(object):
         self.__posTracker = returns.PositionTracker(entryOrder.getInstrumentTraits())
         self.__allOrNone = allOrNone
 
+        print ('Position, __init__, switchState to WaitingEntryState()')
         self.switchState(WaitingEntryState())
 
         entryOrder.setGoodTillCanceled(goodTillCanceled)
@@ -180,15 +188,22 @@ class Position(object):
 
     def __submitAndRegisterOrder(self, order):
         assert(order.isInitial())
+        print ('Position, __submitAndRegisterOrder')
 
         # Check if an order can be submitted in the current state.
+        if order.getId() is not None:
+            print ('Position, __submitAndRegisterOrder -> __state.canSubmitOrder, order[%d]' % (order.getId()))
         self.__state.canSubmitOrder(self, order)
 
         # This may raise an exception, so we wan't to submit the order before moving forward and registering
         # the order in the strategy.
+        if order.getId() is not None:
+            print ('Position, __submitAndRegisterOrder -> submitOrder, order[%d]' % (order.getId()))
         self.getStrategy().getBroker().submitOrder(order)
 
         self.__activeOrders[order.getId()] = order
+        if order.getId() is not None:
+            print ('Position, __submitAndRegisterOrder -> registerPositionOrder, order[%d]' % (order.getId()))
         self.getStrategy().registerPositionOrder(self, order)
 
     def setEntryDateTime(self, dateTime):
@@ -369,7 +384,7 @@ class Position(object):
         self.__exitOrder = exitOrder
 
     def onOrderEvent(self, orderEvent):
-        #print ('Position.onOrderEvent')
+        print ('Position.onOrderEvent')
 
         self.__updatePosTracker(orderEvent)
 
@@ -386,6 +401,7 @@ class Position(object):
             else:
                 self.__shares = order.getInstrumentTraits().roundQuantity(self.__shares - execInfo.getQuantity())
 
+        print ('Position.onOrderEvent -> __state.onOrderEvent')
         self.__state.onOrderEvent(self, orderEvent)
 
     def __updatePosTracker(self, orderEvent):

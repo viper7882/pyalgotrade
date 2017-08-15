@@ -203,6 +203,7 @@ class Broker(broker.Broker):
         self.__barFeed = barFeed
         self.__allowNegativeCash = False
         self.__nextOrderId = 1
+        self.bars = None
 
     def _getNextOrderId(self):
         ret = self.__nextOrderId
@@ -218,11 +219,13 @@ class Broker(broker.Broker):
     def _registerOrder(self, order):
         assert(order.getId() not in self.__activeOrders)
         assert(order.getId() is not None)
+        self.__logger.debug ('_registerOrder, __activeOrders, order[%d] = %s' % (order.getId(), str(order)))
         self.__activeOrders[order.getId()] = order
 
     def _unregisterOrder(self, order):
         assert(order.getId() in self.__activeOrders)
         assert(order.getId() is not None)
+        self.__logger.debug ('_unregisterOrder, __activeOrders, order[%d] = %s' % (order.getId(), str(order)))
         del self.__activeOrders[order.getId()]
 
     def getLogger(self):
@@ -313,7 +316,8 @@ class Broker(broker.Broker):
 
     # Tries to commit an order execution.
     def commitOrderExecution(self, order, dateTime, fillInfo):
-        #print ("backtesting, commitOrderExecution, order = %s" % (str(order)))
+        if order.getId() is not None:
+            self.__logger.debug ('commitOrderExecution, order[%d] = %s' % (order.getId(), str(order)))
         price = fillInfo.getPrice()
         quantity = fillInfo.getQuantity()
 
@@ -364,26 +368,30 @@ class Broker(broker.Broker):
             else:
                 assert(False)
         else:
-            self.__logger.debug("Not enough cash to fill %s order [%s] for %s share/s" % (
+            self.__logger.debug('Not enough cash to fill %s order [%s] for %s share/s' % (
                 order.getInstrument(),
                 order.getId(),
                 order.getRemaining()
             ))
 
     def submitOrder(self, order):
-        #print ("backtesting, submitOrder, order = %s" % (str(order)))
         if order.isInitial():
             order.setSubmitted(self._getNextOrderId(), self._getCurrentDateTime())
             self._registerOrder(order)
             # Switch from INITIAL -> SUBMITTED
+            if order.getId() is not None:
+                self.__logger.debug ('submitOrder, order[%d] = %s, switchState from INITIAL -> SUBMITTED' % (order.getId(), str(order)))
             order.switchState(broker.Order.State.SUBMITTED)
             self.notifyOrderEvent(broker.OrderEvent(order, broker.OrderEvent.Type.SUBMITTED, None))
+            self.__logger.debug ('submitOrder -> processOrders')
+            self.processOrders()
         else:
             raise Exception("The order was already processed")
 
     # Return True if further processing is needed.
     def __preProcessOrder(self, order, bar_):
-        #print ("backtesting, __preProcessOrder, order = %s" % (str(order)))
+        if order.getId() is not None:
+            self.__logger.debug ('__preProcessOrder, order[%d] = %s' % (order.getId(), str(order)))
         ret = True
 
         # For non-GTC orders we need to check if the order has expired.
@@ -394,13 +402,15 @@ class Broker(broker.Broker):
             if expired:
                 ret = False
                 self._unregisterOrder(order)
+                self.__logger.debug ('__preProcessOrder, order[%d] = %s, switchState to CANCELED' % (order.getId(), str(order)))
                 order.switchState(broker.Order.State.CANCELED)
                 self.notifyOrderEvent(broker.OrderEvent(order, broker.OrderEvent.Type.CANCELED, "Expired"))
 
         return ret
 
     def __postProcessOrder(self, order, bar_):
-        #print ("backtesting, __postProcessOrder, order = %s" % (str(order)))
+        if order.getId() is not None:
+            self.__logger.debug ('__postProcessOrder, order[%d] = %s' % (order.getId(), str(order)))
         # For non-GTC orders and daily (or greater) bars we need to check if orders should expire right now
         # before waiting for the next bar.
         if not order.getGoodTillCanceled():
@@ -411,11 +421,13 @@ class Broker(broker.Broker):
             # Cancel the order if it will expire in the next bar.
             if expired:
                 self._unregisterOrder(order)
+                self.__logger.debug ('__postProcessOrder, order[%d] = %s, switchState to CANCELED' % (order.getId(), str(order)))
                 order.switchState(broker.Order.State.CANCELED)
                 self.notifyOrderEvent(broker.OrderEvent(order, broker.OrderEvent.Type.CANCELED, "Expired"))
 
     def __processOrder(self, order, bar_):
-        #print ("backtesting, __processOrder, order = %s" % (str(order)))
+        if order.getId() is not None:
+            self.__logger.debug ('__processOrder, order[%d] = %s' % (order.getId(), str(order)))
         if not self.__preProcessOrder(order, bar_):
             return
 
@@ -428,7 +440,8 @@ class Broker(broker.Broker):
             self.__postProcessOrder(order, bar_)
 
     def __onBarsImpl(self, order, bars):
-        #print ("backtesting, __onBarsImpl, order = %s" % (str(order)))
+        if order.getId() is not None:
+            self.__logger.debug ('__onBarsImpl, order[%d] = %s' % (order.getId(), str(order)))
         # IF WE'RE DEALING WITH MULTIPLE INSTRUMENTS WE SKIP ORDER PROCESSING IF THERE IS NO BAR FOR THE ORDER'S
         # INSTRUMENT TO GET THE SAME BEHAVIOUR AS IF WERE BE PROCESSING ONLY ONE INSTRUMENT.
         bar_ = bars.getBar(order.getInstrument())
@@ -436,6 +449,8 @@ class Broker(broker.Broker):
             # Switch from SUBMITTED -> ACCEPTED
             if order.isSubmitted():
                 order.setAcceptedDateTime(bar_.getDateTime())
+                if order.getId() is not None:
+                    self.__logger.debug ('__onBarsImpl, order[%d] = %s, switchState from SUBMITTED -> ACCEPTED' % (order.getId(), str(order)))
                 order.switchState(broker.Order.State.ACCEPTED)
                 self.notifyOrderEvent(broker.OrderEvent(order, broker.OrderEvent.Type.ACCEPTED, None))
 
@@ -449,17 +464,26 @@ class Broker(broker.Broker):
                 assert(order not in self.__activeOrders)
 
     def onBars(self, dateTime, bars):
-        #print ("backtesting, onBars")
         # Let the fill strategy know that new bars are being processed.
         self.__fillStrategy.onBars(self, bars)
 
+        # Store the bars for later use
+        self.bars = bars
+        self.__logger.debug ('onBars -> __onBarsImpl')
+        self.processOrders()
+
+    def processOrders(self):
+        assert (self.bars != None)
         # This is to froze the orders that will be processed in this event, to avoid new getting orders introduced
         # and processed on this very same event.
         ordersToProcess = self.__activeOrders.values()
+        self.__logger.debug ('processOrders, len of ordersToProcess = %d' % (len(ordersToProcess)))
 
         for order in ordersToProcess:
             # This may trigger orders to be added/removed from __activeOrders.
-            self.__onBarsImpl(order, bars)
+            self.__logger.debug ('processOrders -> __onBarsImpl')
+            self.__onBarsImpl(order, self.bars)
+
 
     def start(self):
         super(Broker, self).start()
@@ -476,7 +500,7 @@ class Broker(broker.Broker):
         return self.__barFeed.eof()
 
     def dispatch(self):
-        #print ('backtesting dispatch')
+        self.__logger.debug ('backtesting dispatch')
         # All events were already emitted while handling barfeed events.
         pass
 
@@ -484,7 +508,7 @@ class Broker(broker.Broker):
         return None
 
     def createMarketOrder(self, action, instrument, quantity, onClose=False):
-        #print ("backtesting, createMarketOrder, action = %s, instrument = %s, quantity = %d" % (str(action), str(instrument), quantity))
+        self.__logger.debug ('createMarketOrder, action = %s, instrument = %s, quantity = %d' % (str(action), str(instrument), quantity))
         # In order to properly support market-on-close with intraday feeds I'd need to know about different
         # exchange/market trading hours and support specifying routing an order to a specific exchange/market.
         # Even if I had all this in place it would be a problem while paper-trading with a live feed since
@@ -498,14 +522,14 @@ class Broker(broker.Broker):
         return LimitOrder(action, instrument, limitPrice, quantity, self.getInstrumentTraits(instrument))
 
     def createStopOrder(self, action, instrument, stopPrice, quantity):
-        #print ("backtesting, createStopOrder, action = %s, instrument = %s, quantity = %d" % (str(action), str(instrument), quantity))
+        self.__logger.debug ('createStopOrder, action = %s, instrument = %s, quantity = %d' % (str(action), str(instrument), quantity))
         return StopOrder(action, instrument, stopPrice, quantity, self.getInstrumentTraits(instrument))
 
     def createStopLimitOrder(self, action, instrument, stopPrice, limitPrice, quantity):
         return StopLimitOrder(action, instrument, stopPrice, limitPrice, quantity, self.getInstrumentTraits(instrument))
 
     def cancelOrder(self, order):
-        #print ("backtesting, cancelOrder, order = %s" % (str(order)))
+        self.__logger.debug ('cancelOrder, order = %s' % (str(order)))
         activeOrder = self.__activeOrders.get(order.getId())
         if activeOrder is None:
             raise Exception("The order is not active anymore")
@@ -513,6 +537,8 @@ class Broker(broker.Broker):
             raise Exception("Can't cancel order that has already been filled")
 
         self._unregisterOrder(activeOrder)
+        if order.getId() is not None:
+            self.__logger.debug ('cancelOrder, order[%d] = %s, switchState to CANCELED' % (order.getId(), str(order)))
         activeOrder.switchState(broker.Order.State.CANCELED)
         self.notifyOrderEvent(
             broker.OrderEvent(activeOrder, broker.OrderEvent.Type.CANCELED, "User requested cancellation")
